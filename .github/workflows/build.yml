@@ -1,0 +1,71 @@
+name: Build (Windows)
+
+# Собираем на каждый push и PR в основные ветки.
+# Это даёт нам быстрый фидбек: красный CI = не работает, зелёный = собирается.
+on:
+  push:
+    branches: [main, "fix/**", "feature/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Release]
+        # Сначала собираем минимальный билд (без ImGui/MinHook).
+        # Когда подключим интеграцию — добавим вторую матрицу с опциями ON.
+        with_imgui: [OFF]
+        with_minhook: [OFF]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Visual Studio 2022 + Windows SDK на windows-latest уже стоят,
+      # отдельно ставить ничего не нужно.
+
+      - name: Show toolchain
+        shell: pwsh
+        run: |
+          cmake --version
+          where cl 2>$null
+          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          Write-Host "Visual Studio: $vsPath"
+
+      - name: Configure (CMake)
+        shell: pwsh
+        run: |
+          cmake -S . -B build `
+            -G "Visual Studio 17 2022" -A x64 `
+            -DKASTOL_WITH_IMGUI=${{ matrix.with_imgui }} `
+            -DKASTOL_WITH_MINHOOK=${{ matrix.with_minhook }}
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config ${{ matrix.config }} --parallel
+
+      - name: List build output
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path build/bin) {
+            Get-ChildItem -Recurse build/bin
+          } else {
+            Write-Host "No build/bin directory."
+          }
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kastol-${{ matrix.config }}-imgui-${{ matrix.with_imgui }}-minhook-${{ matrix.with_minhook }}
+          path: |
+            build/bin/**/kastol.dll
+            build/bin/**/kastol_loader.exe
+          if-no-files-found: warn
+          retention-days: 14
