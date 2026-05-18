@@ -12,7 +12,7 @@
 #include <dxgi.h>
 #include <memory>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Класс рендерера DirectX 11
@@ -102,4 +102,4 @@ private:
     void CleanupResources();
 };
 
-} // namespace cs2_mod
+} // namespace kastol

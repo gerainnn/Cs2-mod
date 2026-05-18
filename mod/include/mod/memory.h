@@ -12,7 +12,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Класс для работы с памятью процесса
@@ -93,4 +93,4 @@ private:
     static std::vector<std::pair<uint8_t, bool>> PatternToBytes(const char* pattern);
 };
 
-} // namespace cs2_mod
+} // namespace kastol

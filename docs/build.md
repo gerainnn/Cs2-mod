@@ -1,91 +1,64 @@
-# Сборка CS2 Mod
+# Сборка KASTOL
 
 ## Требования
 
-- Windows 10/11
-- Visual Studio 2022 (17.0 или новее)
-- CMake 3.20 или новее
+- Windows 10/11 (x64)
+- Visual Studio 2022 (17.0+) c рабочей нагрузкой "Desktop development with C++"
+- CMake 3.20+
 - Windows SDK 10.0
 
-## Зависимости
+> Linux/Mac не поддерживаются: проект использует DXGI/D3D11/CreateRemoteThread,
+> которые есть только на Windows.
 
-Для полноценной сборки понадобятся внешние библиотеки:
+## Быстрая сборка (минимальный билд, без ImGui/MinHook)
 
-1. **ImGui** - UI библиотека
-2. **MinHook** - библиотека для хуков
-3. **Steam API SDK** - для интеграции со Steam
+```powershell
+git clone https://github.com/gerainnn/Cs2-mod.git
+cd Cs2-mod
 
-### Установка зависимостей
-
-```bash
-# Создайте директорию external
-mkdir external
-cd external
-
-# Клонируйте ImGui
-git clone https://github.com/ocornut/imgui.git
-
-# Клонируйте MinHook
-git clone https://github.com/TsudaKageyu/minhook.git
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
 ```
 
-## Сборка с помощью CMake
+После сборки в `build\bin\Release\` появятся:
 
-```bash
-# Создайте директорию сборки
-mkdir build
-cd build
+- `kastol_loader.exe` — загрузчик
+- `kastol.dll`        — сама модификация
 
-# Конфигурация
-cmake .. -G "Visual Studio 17 2022" -A x64
+В таком билде ImGui и MinHook не подключены — мод соберётся, инжектируется,
+напишет лог `kastol.log` рядом с DLL, но реально ничего не отрисует.
+Это намеренная стартовая точка.
 
-# Сборка
-cmake --build . --config Release
+## Сборка с ImGui и MinHook (когда будем интегрировать рендер)
+
+```powershell
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 ^
+  -DKASTOL_WITH_IMGUI=ON ^
+  -DKASTOL_WITH_MINHOOK=ON
+cmake --build build --config Release
 ```
 
-## Сборка в Visual Studio
+CMake сам скачает зависимости через `FetchContent` — ничего вручную в `external/`
+класть не нужно.
 
-1. Откройте `build/CS2ModProject.sln`
-2. Выберите конфигурацию Release
-3. Соберите проект (Build -> Build Solution)
+## Сборка со Steamworks SDK (опционально)
 
-## Выходные файлы
-
-После сборки в `build/bin/Release/` будут находиться:
-- `cs2_mod_loader.exe` - Загрузчик
-- `cs2_mod.dll` - Модификация
-
-## Структура зависимостей
-
-```
-Cs2-mod/
-├── external/
-│   ├── imgui/
-│   │   ├── imgui.h
-│   │   ├── imgui.cpp
-│   │   ├── imgui_impl_dx11.h
-│   │   ├── imgui_impl_dx11.cpp
-│   │   ├── imgui_impl_win32.h
-│   │   └── imgui_impl_win32.cpp
-│   ├── minhook/
-│   │   ├── MinHook.h
-│   │   └── ...
-│   └── steam/
-│       ├── steam_api.h
-│       ├── steam_api64.dll
-│       └── ...
-```
+1. Скачай Steamworks SDK с partner.steamgames.com.
+2. Распакуй в `external/steam_sdk/`.
+3. Сконфигурируй с `-DKASTOL_WITH_STEAM_SDK=ON`.
+4. Скопируй `steam_api64.dll` рядом с `kastol_loader.exe`.
 
 ## Отладка
 
-Для отладки установите конфигурацию Debug:
-
-```bash
-cmake --build . --config Debug
+```powershell
+cmake --build build --config Debug
 ```
 
-## Замечания
+## Известные ограничения текущего каркаса
 
-- Убедитесь, что Steam запущен перед использованием загрузчика
-- CS2 должна быть установлена через Steam
-- Для работы нужен Steam SDK (steam_api64.dll)
+- Реальных хуков `IDXGISwapChain::Present` пока нет.
+- ImGui-меню не рендерится (вызовы закомментированы).
+- JSON-конфиг сохраняется/загружается, но парсер — заглушка.
+- Updater не делает реальных HTTP-запросов.
+
+См. `docs/architecture.md` и план в README.

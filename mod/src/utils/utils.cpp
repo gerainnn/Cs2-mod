@@ -8,12 +8,25 @@
 #include <cstdio>
 #include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
+
+// Получаем HMODULE текущей DLL — нужен для пути к DLL, а не к EXE-процессу.
+// Используем трюк с адресом любой функции внутри этой DLL.
+static HMODULE GetSelfModule() {
+    HMODULE module = nullptr;
+    GetModuleHandleExA(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCSTR>(&GetSelfModule),
+        &module);
+    return module;
+}
 
 std::string WideToUtf8(const std::wstring& wide) {
     if (wide.empty()) return std::string();
     
     int size = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (size <= 1) return std::string();
     std::string result(size - 1, 0);
     WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, &result[0], size, nullptr, nullptr);
     return result;
@@ -23,16 +36,22 @@ std::wstring Utf8ToWide(const std::string& utf8) {
     if (utf8.empty()) return std::wstring();
     
     int size = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, nullptr, 0);
+    if (size <= 1) return std::wstring();
     std::wstring result(size - 1, 0);
     MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, &result[0], size);
     return result;
 }
 
 std::string GetModuleDirectory() {
-    char buffer[MAX_PATH];
-    GetModuleFileNameA(nullptr, buffer, MAX_PATH);
-    std::string::size_type pos = std::string(buffer).find_last_of("\\/");
-    return std::string(buffer).substr(0, pos);
+    char buffer[MAX_PATH] = {};
+    // Берём именно нашу DLL, а не EXE процесса (важно после инжекции в cs2.exe).
+    GetModuleFileNameA(GetSelfModule(), buffer, MAX_PATH);
+    std::string path(buffer);
+    auto pos = path.find_last_of("\\/");
+    if (pos == std::string::npos) {
+        return std::string(".");
+    }
+    return path.substr(0, pos);
 }
 
 std::string GetModuleFilePath(const std::string& fileName) {
@@ -97,4 +116,4 @@ MemoryProtectGuard::~MemoryProtectGuard() {
     }
 }
 
-} // namespace cs2_mod
+} // namespace kastol

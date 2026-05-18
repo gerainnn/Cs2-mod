@@ -6,7 +6,7 @@
 #include "mod/dx11_renderer.h"
 #include "mod/logger.h"
 
-namespace cs2_mod {
+namespace kastol {
 
 DX11Renderer& DX11Renderer::Instance() {
     static DX11Renderer instance;
@@ -126,7 +126,7 @@ bool DX11Renderer::CreateDeviceAndSwapChain() {
     );
     
     if (FAILED(hr)) {
-        LOG_ERROR(("D3D11CreateDeviceAndSwapChain failed: 0x" + std::to_string(hr)).c_str());
+        LOG_ERROR("D3D11CreateDeviceAndSwapChain failed: HRESULT=" + std::to_string(hr));
         return false;
     }
     
@@ -202,4 +202,4 @@ void DX11Renderer::GetScreenSize(int& width, int& height) const {
     height = m_height;
 }
 
-} // namespace cs2_mod
+} // namespace kastol

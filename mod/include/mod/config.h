@@ -12,8 +12,9 @@
 #include <vector>
 #include <functional>
 #include <mutex>
+#include <windows.h> // для VK_INSERT и других виртуальных кодов клавиш
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Тип значения конфигурации
@@ -143,4 +144,4 @@ private:
     std::string SerializeConfig() const;
 };
 
-} // namespace cs2_mod
+} // namespace kastol

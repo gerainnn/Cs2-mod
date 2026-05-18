@@ -7,9 +7,11 @@
 #include "mod/config.h"
 #include "mod/input_handler.h"
 #include "mod/logger.h"
+#include <algorithm>
+#include <string>
 #include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
 
 Overlay& Overlay::Instance() {
     static Overlay instance;
@@ -258,4 +260,4 @@ void Overlay::UpdateInputState() {
     // В реальной реализации проверяем позицию относительно ImGui окон
 }
 
-} // namespace cs2_mod
+} // namespace kastol

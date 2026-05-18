@@ -8,8 +8,9 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <vector>
 
-namespace cs2_mod {
+namespace kastol {
 
 Config& Config::Instance() {
     static Config instance;
@@ -21,9 +22,10 @@ Config::Config() {
 }
 
 Config::~Config() {
-    if (settings.saveOnExit) {
-        Save();
-    }
+    // Сознательно НЕ делаем Save() в деструкторе:
+    // деструктор Meyers-singleton вызывается во время DLL_PROCESS_DETACH,
+    // где I/O может зависнуть или упасть. Save должен делаться явно
+    // через Mod::Shutdown() или по событиям UI.
 }
 
 bool Config::Initialize(const std::string& configPath) {
@@ -201,4 +203,4 @@ std::string Config::SerializeConfig() const {
     return ss.str();
 }
 
-} // namespace cs2_mod
+} // namespace kastol

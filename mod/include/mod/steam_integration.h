@@ -10,7 +10,7 @@
 #include <string>
 #include <cstdint>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Класс интеграции со Steam
@@ -71,4 +71,4 @@ private:
     std::string m_username;
 };
 
-} // namespace cs2_mod
+} // namespace kastol

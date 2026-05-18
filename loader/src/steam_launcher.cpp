@@ -105,7 +105,27 @@ bool SteamLauncher::WaitForGameLaunch(DWORD timeout_ms) {
 }
 
 bool SteamLauncher::IsCS2Running() const {
-    return FindCS2Process();
+    // Локальный поиск без модификации m_processId/m_processHandle
+    HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    PROCESSENTRY32W pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32W);
+    bool found = false;
+
+    if (Process32FirstW(hProcessSnap, &pe32)) {
+        do {
+            if (std::wstring(pe32.szExeFile) == L"cs2.exe") {
+                found = true;
+                break;
+            }
+        } while (Process32NextW(hProcessSnap, &pe32));
+    }
+
+    CloseHandle(hProcessSnap);
+    return found;
 }
 
 std::wstring SteamLauncher::GetCS2Path() const {
@@ -128,6 +148,11 @@ bool SteamLauncher::FindCS2Process() {
             std::wstring processName = pe32.szExeFile;
             if (processName == L"cs2.exe") {
                 m_processId = pe32.th32ProcessID;
+                // Закрываем предыдущий handle, если был — иначе утечка при повторном вызове.
+                if (m_processHandle) {
+                    CloseHandle(m_processHandle);
+                    m_processHandle = nullptr;
+                }
                 m_processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, m_processId);
                 found = true;
                 break;

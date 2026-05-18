@@ -1,70 +1,68 @@
 /**
  * @file dll_main.cpp
- * @brief Точка входа DLL модификации
- * 
- * Этот файл содержит точку входа DLL и экспортируемые функции,
- * которые вызываются загрузчиком при инжекции.
+ * @brief Точка входа DLL модификации KASTOL.
+ *
+ * Содержит DllMain и экспортируемые C-функции, которые вызывает loader
+ * после инжекции DLL в процесс игры.
  */
 
 #include <windows.h>
 #include "mod/core.h"
 #include "mod/logger.h"
+#include "mod/utils.h"
 
-using namespace cs2_mod;
+namespace {
 
-/**
- * @brief Точка входа DLL
- */
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    switch (ul_reason_for_call) {
+/// Стартует инициализацию мода в отдельном потоке, чтобы не блокировать
+/// загрузчик и не выполнять тяжёлую работу прямо в DllMain.
+DWORD WINAPI KastolInitThread(LPVOID lpParameter) {
+    HMODULE selfModule = static_cast<HMODULE>(lpParameter);
+    kastol::Mod::Instance().SetModuleHandle(selfModule);
+
+    // Лог рядом с DLL (по абсолютному пути), а не в CWD процесса игры.
+    const std::string logPath = kastol::GetModuleFilePath("kastol.log");
+    kastol::Logger::Instance().Initialize(logPath);
+
+    LOG_INFO("=== Инициализация KASTOL ===");
+
+    if (!kastol::Mod::Instance().Initialize()) {
+        LOG_ERROR("Не удалось инициализировать модификацию");
+        return 1;
+    }
+
+    LOG_INFO("Модификация успешно инициализирована");
+    return 0;
+}
+
+} // namespace
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID /*reserved*/) {
+    switch (reason) {
         case DLL_PROCESS_ATTACH:
-            // Отключаем уведомления о потоках
             DisableThreadLibraryCalls(hModule);
-            
-            // Сохраняем дескриптор модуля
-            // Mod::Instance().SetModule(hModule);
+            // Инициализация в отдельном потоке: безопасно для DllMain.
+            CreateThread(nullptr, 0, KastolInitThread, hModule, 0, nullptr);
             break;
-            
+
         case DLL_PROCESS_DETACH:
-            // Завершаем работу при выгрузке
-            Mod::Instance().Shutdown();
+            // На detach не делаем тяжёлый I/O: процесс уже умирает.
+            kastol::Mod::Instance().Shutdown();
             break;
     }
     return TRUE;
 }
 
-/**
- * @brief Инициализировать модификацию
- * 
- * Эта функция вызывается загрузчиком после инжекции DLL.
- */
-extern "C" MOD_API bool InitializeMod() {
-    // Инициализация логгера
-    Logger::Instance().Initialize("cs2_mod.log");
-    LOG_INFO("=== Инициализация CS2 Mod ===");
-    
-    // Инициализация модификации
-    if (!Mod::Instance().Initialize()) {
-        LOG_ERROR("Не удалось инициализировать модификацию");
-        return false;
-    }
-    
-    LOG_INFO("Модификация успешно инициализирована");
-    return true;
+// ---- Экспортируемые функции (на случай, если loader захочет вызвать их вручную) ----
+
+extern "C" KASTOL_API bool InitializeKastol() {
+    return kastol::Mod::Instance().Initialize();
 }
 
-/**
- * @brief Завершить работу модификации
- */
-extern "C" MOD_API void ShutdownMod() {
-    LOG_INFO("Завершение работы модификации");
-    Mod::Instance().Shutdown();
-    LOG_INFO("Модификация выгружена");
+extern "C" KASTOL_API void ShutdownKastol() {
+    kastol::Mod::Instance().Shutdown();
 }
 
-/**
- * @brief Получить версию модификации
- */
-extern "C" MOD_API const char* GetModVersion() {
-    return Mod::Instance().GetVersion().c_str();
+extern "C" KASTOL_API const char* GetKastolVersion() {
+    static std::string version = kastol::Mod::Instance().GetVersion();
+    return version.c_str();
 }

@@ -176,34 +176,22 @@ KASTOL/
 
 ### Инструкция по сборке
 
-```bash
+```powershell
 # 1. Клонируйте репозиторий
 git clone https://github.com/gerainnn/Cs2-mod.git
 cd Cs2-mod
 
-# 2. Создайте директорию external и скачайте зависимости
-mkdir external
-cd external
+# 2. Сконфигурируйте (зависимости подтянутся автоматически через FetchContent,
+#    если включить опции). Минимальный билд работает без них.
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 
-# ImGui
-git clone https://github.com/ocornut/imgui.git
+# Опционально (когда дойдём до интеграции рендера):
+# cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DKASTOL_WITH_IMGUI=ON -DKASTOL_WITH_MINHOOK=ON
 
-# MinHook
-git clone https://github.com/TsudaKageyu/minhook.git
+# 3. Сборка
+cmake --build build --config Release
 
-cd ..
-
-# 3. Создайте директорию сборки
-mkdir build
-cd build
-
-# 4. Конфигурация проекта
-cmake .. -G "Visual Studio 17 2022" -A x64
-
-# 5. Сборка
-cmake --build . --config Release
-
-# 6. Результаты сборки
+# 4. Результаты:
 # build/bin/Release/kastol_loader.exe
 # build/bin/Release/kastol.dll
 ```

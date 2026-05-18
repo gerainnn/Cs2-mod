@@ -12,7 +12,7 @@
 #include <map>
 #include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Структура для хранения состояния клавиши
@@ -161,4 +161,4 @@ private:
     void InvokeKeyPressCallback(int key);
 };
 
-} // namespace cs2_mod
+} // namespace kastol

@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace cs2_mod {
+namespace kastol {
 
 Logger& Logger::Instance() {
     static Logger instance;
@@ -107,4 +107,4 @@ std::string Logger::GetTimestamp() const {
     return ss.str();
 }
 
-} // namespace cs2_mod
+} // namespace kastol

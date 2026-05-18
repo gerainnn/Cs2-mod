@@ -10,7 +10,7 @@
 #include <mutex>
 #include <ctime>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Уровни логирования
@@ -63,9 +63,9 @@ private:
 };
 
 // Макросы для удобного логирования
-#define LOG_DEBUG(msg) cs2_mod::Logger::Instance().Debug(msg)
-#define LOG_INFO(msg) cs2_mod::Logger::Instance().Info(msg)
-#define LOG_WARNING(msg) cs2_mod::Logger::Instance().Warning(msg)
-#define LOG_ERROR(msg) cs2_mod::Logger::Instance().Error(msg)
+#define LOG_DEBUG(msg) kastol::Logger::Instance().Debug(msg)
+#define LOG_INFO(msg) kastol::Logger::Instance().Info(msg)
+#define LOG_WARNING(msg) kastol::Logger::Instance().Warning(msg)
+#define LOG_ERROR(msg) kastol::Logger::Instance().Error(msg)
 
-} // namespace cs2_mod
+} // namespace kastol
