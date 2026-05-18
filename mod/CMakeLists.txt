@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(CS2Mod VERSION 1.0.0 LANGUAGES CXX)
+project(KASTOL VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -36,17 +36,17 @@ set(MOD_HEADERS
 )
 
 # Создание DLL
-add_library(cs2_mod SHARED ${MOD_SOURCES} ${MOD_HEADERS})
+add_library(kastol SHARED ${MOD_SOURCES} ${MOD_HEADERS})
 
 # Включение директорий
-target_include_directories(cs2_mod PRIVATE 
+target_include_directories(kastol PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../external/imgui
     ${CMAKE_CURRENT_SOURCE_DIR}/../external/minhook
 )
 
 # Линковка с необходимыми библиотеками
-target_link_libraries(cs2_mod PRIVATE
+target_link_libraries(kastol PRIVATE
     d3d11
     dxgi
     Psapi
@@ -56,15 +56,15 @@ target_link_libraries(cs2_mod PRIVATE
 )
 
 # Определения
-target_compile_definitions(cs2_mod PRIVATE
+target_compile_definitions(kastol PRIVATE
     _CRT_SECURE_NO_WARNINGS
     WIN32_LEAN_AND_MEAN
     NOMINMAX
-    CS2_MOD_EXPORTS
+    KASTOL_EXPORTS
 )
 
 # Установка output directory
-set_target_properties(cs2_mod PROPERTIES
+set_target_properties(kastol PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"

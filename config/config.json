@@ -1,13 +1,15 @@
 {
     "mod": {
-        "name": "CS2 Mod",
+        "name": "KASTOL",
         "version": "1.0.0",
-        "author": "Your Name"
+        "author": "KASTOL Team",
+        "description": "Professional CS2 Modification Framework"
     },
     "menu": {
         "toggleKey": 45,
         "transparency": 0.95,
-        "accentColor": [0.4, 0.7, 1.0, 1.0]
+        "accentColor": [0.4, 0.7, 1.0, 1.0],
+        "bgColor": [0.1, 0.1, 0.15, 0.95]
     },
     "overlay": {
         "enabled": true,
@@ -20,6 +22,12 @@
     },
     "loader": {
         "checkUpdates": true,
-        "updateUrl": "https://api.example.com/cs2-mod"
+        "updateUrl": "https://api.kastol.mod"
+    },
+    "features": {
+        "example_feature": {
+            "enabled": false,
+            "value": 100
+        }
     }
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(CS2ModProject VERSION 1.0.0 LANGUAGES CXX)
+project(KASTOL VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,9 +19,9 @@ add_subdirectory(mod)
 
 # Документация
 message(STATUS "")
-message(STATUS "=== CS2 Mod Configuration ===")
+message(STATUS "=== KASTOL Configuration ===")
 message(STATUS "Version: ${PROJECT_VERSION}")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "==============================")
+message(STATUS "=============================")
 message(STATUS "")

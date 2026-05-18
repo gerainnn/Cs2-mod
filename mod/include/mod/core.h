@@ -1,8 +1,6 @@
-#pragma once
-
 /**
  * @file core.h
- * @brief Ядро модификации CS2
+ * @brief Ядро модификации KASTOL
  * 
  * Основной класс, управляющий жизненным циклом модификации.
  * Инициализирует все подсистемы и обеспечивает их взаимодействие.
@@ -12,13 +10,13 @@
 #include <string>
 #include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
 
 // Экспорт функций DLL
-#ifdef CS2_MOD_EXPORTS
-    #define MOD_API __declspec(dllexport)
+#ifdef KASTOL_EXPORTS
+    #define KASTOL_API __declspec(dllexport)
 #else
-    #define MOD_API __declspec(dllimport)
+    #define KASTOL_API __declspec(dllimport)
 #endif
 
 /**
@@ -33,9 +31,9 @@ enum class ModState {
 };
 
 /**
- * @brief Основной класс модификации
+ * @brief Основной класс модификации KASTOL
  */
-class MOD_API Mod {
+class KASTOL_API Mod {
 public:
     /**
      * @brief Получить единственный экземпляр модификации
@@ -90,37 +88,17 @@ private:
     std::string m_name;
     HMODULE m_module;
 
-    // Подсистемы (будут добавлены позже)
-    // std::unique_ptr<Overlay> m_overlay;
-    // std::unique_ptr<Renderer> m_renderer;
-    // std::unique_ptr<Config> m_config;
-
-    /**
-     * @brief Инициализировать подсистемы
-     */
     bool InitializeSubsystems();
-
-    /**
-     * @brief Завершить работу подсистем
-     */
     void ShutdownSubsystems();
-
-    /**
-     * @brief Создать потоки для рендеринга
-     */
     bool CreateRenderThread();
-
-    /**
-     * @brief Установить хуки для DirectX
-     */
     bool InstallDirectXHooks();
 };
 
 // Функции экспорта DLL
 extern "C" {
-    MOD_API bool InitializeMod();
-    MOD_API void ShutdownMod();
-    MOD_API const char* GetModVersion();
+    KASTOL_API bool InitializeKastol();
+    KASTOL_API void ShutdownKastol();
+    KASTOL_API const char* GetKastolVersion();
 }
 
-} // namespace cs2_mod
+} // namespace kastol

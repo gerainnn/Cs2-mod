@@ -1,21 +1,25 @@
-# Архитектура CS2 Mod
+# Архитектура KASTOL
 
 ## Обзор
 
-CS2 Mod - это клиентская модификация для Counter-Strike 2, состоящая из двух основных компонентов:
+**KASTOL** - это профессиональная клиентская модификация для Counter-Strike 2, состоящая из двух основных компонентов:
 
 ### 1. Loader (Загрузчик) - EXE
 
+**Файл:** `kastol_loader.exe`
+
 Отвечает за:
 - Инициализацию Steam API
-- Запуск CS2 через Steam
-- Инжектирование DLL модификации в процесс игры
-- Проверку обновлений
+- Запуск CS2 через Steam (App ID: 730)
+- Инжектирование `kastol.dll` в процесс игры
+- Проверку обновлений мода
 
 ### 2. Mod (Модификация) - DLL
 
+**Файл:** `kastol.dll`
+
 Отвечает за:
-- Создание overlay-интерфейса
+- Создание overlay-интерфейса поверх игры
 - Рендеринг UI (ImGui + DirectX 11)
 - Обработку пользовательского ввода
 - Управление конфигурацией
@@ -23,7 +27,7 @@ CS2 Mod - это клиентская модификация для Counter-Stri
 ## Структура проекта
 
 ```
-Cs2-mod/
+KASTOL/
 ├── loader/                    # Загрузчик (EXE)
 │   ├── src/
 │   │   ├── main.cpp          # Точка входа
@@ -40,7 +44,7 @@ Cs2-mod/
 │   ├── src/
 │   │   ├── dll_main.cpp      # Точка входа DLL
 │   │   ├── core/
-│   │   │   ├── mod.cpp       # Основной класс модификации
+│   │   │   ├── mod.cpp       # Основной класс KASTOL
 │   │   │   └── config.cpp    # Система конфигурации
 │   │   ├── overlay/
 │   │   │   ├── overlay.cpp   # Overlay-интерфейс
@@ -51,9 +55,9 @@ Cs2-mod/
 │   │   ├── steam/
 │   │   │   └── steam_integration.cpp
 │   │   └── utils/
-│   │       ├── memory.cpp    # Работа с памятью
-│   │       ├── utils.cpp     # Утилиты
-│   │       └── logger.cpp    # Логирование
+│   │       ├── memory.cpp
+│   │       ├── utils.cpp
+│   │       └── logger.cpp
 │   └── include/mod/
 │       ├── core.h
 │       ├── config.h
@@ -70,10 +74,16 @@ Cs2-mod/
 │   └── config.json
 │
 ├── docs/                      # Документация
-│   └── architecture.md
+│   ├── architecture.md
+│   ├── build.md
+│   ├── contributing.md
+│   └── api.md
 │
-├── CMakeLists.txt            # Главный CMake файл
-└── README.md
+├── resources/                 # Ресурсы
+│
+├── CMakeLists.txt            
+├── README.md                 
+└── LICENSE                   
 ```
 
 ## Поток выполнения
