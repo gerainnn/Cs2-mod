@@ -1,0 +1,25 @@
+{
+    "mod": {
+        "name": "CS2 Mod",
+        "version": "1.0.0",
+        "author": "Your Name"
+    },
+    "menu": {
+        "toggleKey": 45,
+        "transparency": 0.95,
+        "accentColor": [0.4, 0.7, 1.0, 1.0]
+    },
+    "overlay": {
+        "enabled": true,
+        "showFPS": false,
+        "showTime": false
+    },
+    "steam": {
+        "appId": 730,
+        "autoLaunch": true
+    },
+    "loader": {
+        "checkUpdates": true,
+        "updateUrl": "https://api.example.com/cs2-mod"
+    }
+}

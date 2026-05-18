@@ -1,0 +1,57 @@
+# Build directories
+build/
+bin/
+lib/
+obj/
+out/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.sln.docstates
+*.obj
+*.pch
+*.pdb
+*.idb
+*.ilk
+*.log
+*.tlog
+
+# Compiled files
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# OS files
+.Desktop.ini
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Config backups
+*.bak
+*.backup
+
+# Temporary files
+tmp/
+temp/
