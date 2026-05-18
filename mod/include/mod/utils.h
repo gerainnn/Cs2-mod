@@ -9,7 +9,7 @@
 #include <vector>
 #include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Преобразовать широкую строку в обычную
@@ -85,4 +85,4 @@ private:
     bool m_valid;
 };
 
-} // namespace cs2_mod
+} // namespace kastol

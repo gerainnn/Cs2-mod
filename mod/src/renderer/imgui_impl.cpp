@@ -6,7 +6,7 @@
 #include "mod/imgui_impl.h"
 #include "mod/logger.h"
 
-namespace cs2_mod {
+namespace kastol {
 
 ImGuiImpl& ImGuiImpl::Instance() {
     static ImGuiImpl instance;
@@ -119,4 +119,4 @@ void ImGuiImpl::SetupFonts() {
     // io.Fonts->AddFontFromFileTTF("path/to/font.ttf", 18.0f, &config);
 }
 
-} // namespace cs2_mod
+} // namespace kastol

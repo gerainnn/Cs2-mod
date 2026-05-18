@@ -6,10 +6,12 @@
 #include "mod/core.h"
 #include "mod/config.h"
 #include "mod/overlay.h"
+#include "mod/input_handler.h"
 #include "mod/logger.h"
+#include "mod/utils.h"
 #include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
 
 Mod& Mod::Instance() {
     static Mod instance;
@@ -19,7 +21,7 @@ Mod& Mod::Instance() {
 Mod::Mod()
     : m_state(ModState::Uninitialized)
     , m_version("1.0.0")
-    , m_name("CS2 Mod")
+    , m_name("KASTOL")
     , m_module(nullptr) {
 }
 
@@ -77,11 +79,11 @@ void Mod::Update(float deltaTime) {
         return;
     }
 
-    // Обновление конфигурации
-    Config::Instance();
-    
-    // Обновление overlay
-    Overlay::Instance();
+    // Обновление подсистем (передаём deltaTime реально)
+    InputHandler::Instance().Update(deltaTime);
+    // Конфиг и оверлей пока не имеют tick-логики, но дёргаем для consistency.
+    (void)Config::Instance();
+    (void)Overlay::Instance();
 }
 
 ModState Mod::GetState() const {
@@ -103,14 +105,21 @@ std::string Mod::GetName() const {
 bool Mod::InitializeSubsystems() {
     LOG_INFO("Инициализация подсистем...");
 
-    // Инициализация конфигурации
-    if (!Config::Instance().Initialize("config.json")) {
+    // Конфиг — рядом с DLL.
+    const std::string configPath = GetModuleFilePath("kastol_config.json");
+    if (!Config::Instance().Initialize(configPath)) {
         LOG_WARNING("Не удалось загрузить конфигурацию, используются значения по умолчанию");
     }
 
-    // Инициализация overlay
-    // Overlay будет инициализирован после получения HWND игры
-    
+    // Обработчик ввода.
+    if (!InputHandler::Instance().Initialize()) {
+        LOG_ERROR("Не удалось инициализировать обработчик ввода");
+        return false;
+    }
+    InputHandler::Instance().SetMenuToggleKey(Config::Instance().settings.menuToggleKey);
+
+    // Overlay инициализируется позже — после получения HWND из DXGI-хука.
+
     LOG_INFO("Подсистемы инициализированы");
     return true;
 }
@@ -153,4 +162,4 @@ bool Mod::InstallDirectXHooks() {
     return true;
 }
 
-} // namespace cs2_mod
+} // namespace kastol

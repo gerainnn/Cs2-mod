@@ -6,7 +6,7 @@
 #include "mod/steam_integration.h"
 #include "mod/logger.h"
 
-namespace cs2_mod {
+namespace kastol {
 
 SteamIntegration& SteamIntegration::Instance() {
     static SteamIntegration instance;
@@ -87,4 +87,4 @@ std::string SteamIntegration::GetSteamInstallPath() const {
     return "";
 }
 
-} // namespace cs2_mod
+} // namespace kastol

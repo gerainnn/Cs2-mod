@@ -1,7 +1,9 @@
+#pragma once
+
 /**
  * @file core.h
  * @brief Ядро модификации KASTOL
- * 
+ *
  * Основной класс, управляющий жизненным циклом модификации.
  * Инициализирует все подсистемы и обеспечивает их взаимодействие.
  */
@@ -10,14 +12,15 @@
 #include <string>
 #include <windows.h>
 
-namespace kastol {
-
-// Экспорт функций DLL
+// Экспорт функций DLL.
+// Определяется один раз для всего проекта — используется и в core.h, и в dll_main.cpp.
 #ifdef KASTOL_EXPORTS
     #define KASTOL_API __declspec(dllexport)
 #else
     #define KASTOL_API __declspec(dllimport)
 #endif
+
+namespace kastol {
 
 /**
  * @brief Состояние модификации
@@ -35,47 +38,20 @@ enum class ModState {
  */
 class KASTOL_API Mod {
 public:
-    /**
-     * @brief Получить единственный экземпляр модификации
-     */
     static Mod& Instance();
 
-    /**
-     * @brief Инициализировать модификацию
-     * @return true если успешно
-     */
     bool Initialize();
-
-    /**
-     * @brief Завершить работу модификации
-     */
     void Shutdown();
-
-    /**
-     * @brief Обновить состояние модификации
-     * @param deltaTime Время между кадрами
-     */
     void Update(float deltaTime);
 
-    /**
-     * @brief Получить текущее состояние
-     */
     ModState GetState() const;
-
-    /**
-     * @brief Проверить, инициализирована ли модификация
-     */
     bool IsInitialized() const;
 
-    /**
-     * @brief Получить версию модификации
-     */
     std::string GetVersion() const;
-
-    /**
-     * @brief Получить имя модификации
-     */
     std::string GetName() const;
+
+    void SetModuleHandle(HMODULE module) { m_module = module; }
+    HMODULE GetModuleHandle() const { return m_module; }
 
 private:
     Mod();
@@ -94,11 +70,11 @@ private:
     bool InstallDirectXHooks();
 };
 
-// Функции экспорта DLL
+} // namespace kastol
+
+// Функции экспорта DLL — снаружи namespace, чтобы имена не были покорёжены C++ mangling.
 extern "C" {
     KASTOL_API bool InitializeKastol();
     KASTOL_API void ShutdownKastol();
     KASTOL_API const char* GetKastolVersion();
 }
-
-} // namespace kastol

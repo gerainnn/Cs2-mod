@@ -10,9 +10,11 @@
 
 #include <memory>
 #include <functional>
+#include <string>
+#include <vector>
 #include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Структура для хранения информации об окне
@@ -148,4 +150,4 @@ private:
     void UpdateInputState();
 };
 
-} // namespace cs2_mod
+} // namespace kastol

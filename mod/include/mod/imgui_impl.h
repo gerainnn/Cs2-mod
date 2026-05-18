@@ -8,8 +8,9 @@
  */
 
 #include <memory>
+#include <windows.h>
 
-namespace cs2_mod {
+namespace kastol {
 
 /**
  * @brief Класс ImGui реализации
@@ -74,4 +75,4 @@ private:
     void* m_context;
 };
 
-} // namespace cs2_mod
+} // namespace kastol

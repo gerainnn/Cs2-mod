@@ -9,7 +9,7 @@
 #include <sstream>
 #include <algorithm>
 
-namespace cs2_mod {
+namespace kastol {
 
 std::vector<std::pair<uint8_t, bool>> Memory::PatternToBytes(const char* pattern) {
     std::vector<std::pair<uint8_t, bool>> bytes;
@@ -121,4 +121,4 @@ bool Memory::ProtectMemory(uintptr_t address, size_t size, DWORD newProtect, DWO
     return VirtualProtect(reinterpret_cast<LPVOID>(address), size, newProtect, oldProtect) != FALSE;
 }
 
-} // namespace cs2_mod
+} // namespace kastol

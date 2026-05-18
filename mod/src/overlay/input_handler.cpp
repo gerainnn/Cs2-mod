@@ -6,9 +6,11 @@
 #include "mod/input_handler.h"
 #include "mod/config.h"
 #include "mod/logger.h"
+#include "mod/overlay.h"
 #include <windows.h>
+#include <windowsx.h> // для GET_X_LPARAM / GET_Y_LPARAM
 
-namespace cs2_mod {
+namespace kastol {
 
 InputHandler& InputHandler::Instance() {
     static InputHandler instance;
@@ -49,10 +51,9 @@ void InputHandler::Update(float deltaTime) {
     UpdateKeyboardState(deltaTime);
     UpdateMouseState();
     
-    // Проверка клавиши переключения меню
+    // Проверка клавиши переключения меню — toggle оверлея
     if (m_keyStates[m_menuToggleKey].pressed) {
-        // Вызываем toggle overlay
-        // Overlay::Instance().Toggle();
+        Overlay::Instance().Toggle();
     }
 }
 
@@ -60,76 +61,71 @@ bool InputHandler::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
     if (!m_initialized) {
         return false;
     }
-    
-    // Если ввод заблокирован, перехватываем сообщения
+
+    // ВАЖНО: toggle-клавиша должна обрабатываться ВСЕГДА, иначе меню никогда не откроется.
+    // Также сами состояния клавиш мы обновляем независимо от блокировки —
+    // блокировка влияет только на то, "поглощаем" ли мы сообщение для игры.
     switch (msg) {
         case WM_KEYDOWN:
-        case WM_KEYUP:
-        case WM_SYSKEYDOWN:
-        case WM_SYSKEYUP:
-            if (m_inputBlocked) {
-                // Обрабатываем клавишу
-                int key = static_cast<int>(wParam);
-                if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) {
-                    if (!m_keyStates[key].held) {
-                        m_keyStates[key].pressed = true;
-                        InvokeKeyPressCallback(key);
-                    }
-                    m_keyStates[key].held = true;
-                } else {
-                    m_keyStates[key].released = true;
-                    m_keyStates[key].held = false;
+        case WM_SYSKEYDOWN: {
+            int key = static_cast<int>(wParam);
+            if (key >= 0 && key < 256) {
+                if (!m_keyStates[key].held) {
+                    m_keyStates[key].pressed = true;
+                    InvokeKeyPressCallback(key);
                 }
-                return true;
+                m_keyStates[key].held = true;
             }
-            break;
-            
+            return m_inputBlocked;
+        }
+
+        case WM_KEYUP:
+        case WM_SYSKEYUP: {
+            int key = static_cast<int>(wParam);
+            if (key >= 0 && key < 256) {
+                m_keyStates[key].released = true;
+                m_keyStates[key].held = false;
+            }
+            return m_inputBlocked;
+        }
+
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
-            if (m_inputBlocked) {
-                m_mouseState.leftPressed = (msg == WM_LBUTTONDOWN);
-                m_mouseState.leftReleased = (msg == WM_LBUTTONUP);
-                m_mouseState.leftHeld = (msg == WM_LBUTTONDOWN);
-                return true;
-            }
-            break;
-            
+            m_mouseState.leftPressed  = (msg == WM_LBUTTONDOWN);
+            m_mouseState.leftReleased = (msg == WM_LBUTTONUP);
+            m_mouseState.leftHeld     = (msg == WM_LBUTTONDOWN);
+            return m_inputBlocked;
+
         case WM_RBUTTONDOWN:
         case WM_RBUTTONUP:
-            if (m_inputBlocked) {
-                m_mouseState.rightPressed = (msg == WM_RBUTTONDOWN);
-                m_mouseState.rightReleased = (msg == WM_RBUTTONUP);
-                m_mouseState.rightHeld = (msg == WM_RBUTTONDOWN);
-                return true;
-            }
-            break;
-            
+            m_mouseState.rightPressed  = (msg == WM_RBUTTONDOWN);
+            m_mouseState.rightReleased = (msg == WM_RBUTTONUP);
+            m_mouseState.rightHeld     = (msg == WM_RBUTTONDOWN);
+            return m_inputBlocked;
+
         case WM_MBUTTONDOWN:
         case WM_MBUTTONUP:
-            if (m_inputBlocked) {
-                m_mouseState.middlePressed = (msg == WM_MBUTTONDOWN);
-                m_mouseState.middleReleased = (msg == WM_MBUTTONUP);
-                m_mouseState.middleHeld = (msg == WM_MBUTTONDOWN);
-                return true;
-            }
-            break;
-            
-        case WM_MOUSEMOVE:
-            if (m_inputBlocked) {
-                m_mouseState.x = GET_X_LPARAM(lParam);
-                m_mouseState.y = GET_Y_LPARAM(lParam);
-                return true;
-            }
-            break;
-            
+            m_mouseState.middlePressed  = (msg == WM_MBUTTONDOWN);
+            m_mouseState.middleReleased = (msg == WM_MBUTTONUP);
+            m_mouseState.middleHeld     = (msg == WM_MBUTTONDOWN);
+            return m_inputBlocked;
+
+        case WM_MOUSEMOVE: {
+            // Только клиентские координаты окна, без смешения с GetCursorPos.
+            const int newX = GET_X_LPARAM(lParam);
+            const int newY = GET_Y_LPARAM(lParam);
+            m_mouseState.deltaX = newX - m_mouseState.x;
+            m_mouseState.deltaY = newY - m_mouseState.y;
+            m_mouseState.x = newX;
+            m_mouseState.y = newY;
+            return m_inputBlocked;
+        }
+
         case WM_MOUSEWHEEL:
-            if (m_inputBlocked) {
-                m_mouseState.wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam) / 120.0f;
-                return true;
-            }
-            break;
+            m_mouseState.wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam) / 120.0f;
+            return m_inputBlocked;
     }
-    
+
     return false;
 }
 
@@ -196,14 +192,9 @@ void InputHandler::UpdateKeyboardState(float deltaTime) {
 }
 
 void InputHandler::UpdateMouseState() {
-    // Получаем позицию курсора
-    POINT cursorPos;
-    if (GetCursorPos(&cursorPos)) {
-        m_mouseState.deltaX = cursorPos.x - m_mouseState.x;
-        m_mouseState.deltaY = cursorPos.y - m_mouseState.y;
-        m_mouseState.x = cursorPos.x;
-        m_mouseState.y = cursorPos.y;
-    }
+    // Координаты и delta теперь обновляются исключительно через WM_MOUSEMOVE
+    // (см. HandleMessage). Здесь оставлено пустым на случай будущих расширений
+    // (например, raw-input или fallback на GetCursorPos при свернутом окне).
 }
 
 void InputHandler::ResetFrameStates() {
@@ -229,4 +220,4 @@ void InputHandler::InvokeKeyPressCallback(int key) {
     }
 }
 
-} // namespace cs2_mod
+} // namespace kastol

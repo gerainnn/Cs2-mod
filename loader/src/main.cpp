@@ -19,15 +19,32 @@
 
 using namespace cs2_mod::loader;
 
+namespace {
+
+// Корректная конверсия wide-строки в UTF-8 для логирования.
+std::string WideToUtf8(const std::wstring& w) {
+    if (w.empty()) return {};
+    int size = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (size <= 1) return {};
+    std::string out(size - 1, 0);
+    WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, &out[0], size, nullptr, nullptr);
+    return out;
+}
+
+} // namespace
+
 /**
- * @brief Получить путь к DLL модификации
+ * @brief Получить путь к DLL модификации (kastol.dll рядом с loader.exe)
  */
 std::wstring GetModDllPath() {
     wchar_t buffer[MAX_PATH];
     GetModuleFileNameW(nullptr, buffer, MAX_PATH);
-    std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
-    std::wstring exePath = std::wstring(buffer).substr(0, pos);
-    return exePath + L"\\cs2_mod.dll";
+    std::wstring exePath(buffer);
+    auto pos = exePath.find_last_of(L"\\/");
+    if (pos == std::wstring::npos) {
+        return L"kastol.dll";
+    }
+    return exePath.substr(0, pos) + L"\\kastol.dll";
 }
 
 /**
@@ -35,7 +52,7 @@ std::wstring GetModDllPath() {
  */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     // Инициализация логгера
-    if (!Logger::Instance().Initialize("cs2_mod_loader.log")) {
+    if (!Logger::Instance().Initialize("kastol_loader.log")) {
         MessageBoxA(nullptr, "Не удалось инициализировать логгер", "Ошибка", MB_ICONERROR);
         return 1;
     }
@@ -109,7 +126,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     // Получаем путь к DLL модификации
     std::wstring modDllPath = GetModDllPath();
-    LOG_INFO(("Путь к модификации: " + std::string(modDllPath.begin(), modDllPath.end())).c_str());
+    LOG_INFO("Путь к модификации: " + WideToUtf8(modDllPath));
 
     // Инжектирование модификации
     Injector injector;
@@ -126,8 +143,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     LOG_INFO("Инжектирование модификации...");
     if (!injector.Inject(cs2Process, modDllPath)) {
-        LOG_ERROR(("Ошибка инжекции: " + std::string(injector.GetLastErrorString().begin(), 
-                     injector.GetLastErrorString().end())).c_str());
+        LOG_ERROR("Ошибка инжекции: " + WideToUtf8(injector.GetLastErrorString()));
         MessageBoxA(nullptr, 
             "Не удалось загрузить модификацию в игру.",
             "Ошибка инжекции", 
