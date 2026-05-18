@@ -7,6 +7,7 @@
 #include "logger.h"
 #include <tlhelp32.h>
 #include <shlobj.h>
+#include <shellapi.h>  // ShellExecuteW (с WIN32_LEAN_AND_MEAN не подтягивается автоматом)
 
 namespace cs2_mod {
 namespace loader {
@@ -33,7 +34,6 @@ bool SteamLauncher::Initialize() {
     // SteamAPI_Init() и т.д.
     
     // Проверяем, запущен ли Steam
-    HANDLE steamProcess = nullptr;
     PROCESSENTRY32W pe32;
     pe32.dwSize = sizeof(PROCESSENTRY32W);
     

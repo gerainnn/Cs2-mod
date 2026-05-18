@@ -50,7 +50,7 @@ std::wstring GetModDllPath() {
 /**
  * @brief Точка входа приложения
  */
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/) {
     // Инициализация логгера
     if (!Logger::Instance().Initialize("kastol_loader.log")) {
         MessageBoxA(nullptr, "Не удалось инициализировать логгер", "Ошибка", MB_ICONERROR);
