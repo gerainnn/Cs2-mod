@@ -180,7 +180,7 @@ void Config::SetDefaults() {
     m_values["saveOnExit"] = { ConfigValueType::Boolean, "saveOnExit", "true", "Сохранять при выходе" };
 }
 
-bool Config::ParseConfig(const std::string& content) {
+bool Config::ParseConfig(const std::string& /*content*/) {
     // Простая реализация парсинга JSON
     // В реальной реализации используйте библиотеку nlohmann/json
     

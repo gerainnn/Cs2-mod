@@ -84,13 +84,13 @@ void ImGuiImpl::Render() {
     // ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
-void ImGuiImpl::OnResize(int width, int height) {
+void ImGuiImpl::OnResize(int /*width*/, int /*height*/) {
     if (!m_initialized) return;
     
     // Обновление размеров при ресайзе окна
 }
 
-bool ImGuiImpl::HandleEvent(void* msg) {
+bool ImGuiImpl::HandleEvent(void* /*msg*/) {
     if (!m_initialized) return false;
     
     // ImGui_ImplWin32_WndProcHandler(m_hwnd, ...)

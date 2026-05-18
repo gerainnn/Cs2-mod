@@ -18,7 +18,7 @@ std::vector<std::pair<uint8_t, bool>> Memory::PatternToBytes(const char* pattern
     
     while (stream >> byteStr) {
         if (byteStr == "??" || byteStr == "?") {
-            bytes.push_back({ 0, false }); // Wildcard
+            bytes.push_back({ uint8_t{0}, false }); // Wildcard
         } else {
             uint8_t byte = static_cast<uint8_t>(std::stoul(byteStr, nullptr, 16));
             bytes.push_back({ byte, true });
